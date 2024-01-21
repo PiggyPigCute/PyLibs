@@ -1,4 +1,6 @@
-import mat.s.geometry as _g
+
+# NEEDS `geoometry` lib
+
 import numpy as _np
 import matplotlib.pyplot as _plt
 
