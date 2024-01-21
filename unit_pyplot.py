@@ -1,7 +1,8 @@
 
+## NEEDS `unit_calc` lib
+
 import numpy as _np
 import matplotlib.pyplot as _plt
-import mat.s.unit_calc as _u
 
 
 def _get_unit(X):
