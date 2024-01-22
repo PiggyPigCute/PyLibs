@@ -1,7 +1,7 @@
 
-import numpy
+from numpy import ndarray
 
-def debug_print(instance, name="Debug", first_prefix="", second_prefix="", root = None, visited = None, equality = " = "):
+def debug_print(instance, name = "Debug", first_prefix = "", second_prefix = "", root = None, visited = None, equality = " = "):
     if visited == None:
         visited = []
     if instance is None:
@@ -9,15 +9,20 @@ def debug_print(instance, name="Debug", first_prefix="", second_prefix="", root 
         return
     if instance is root:
         print(first_prefix, name + equality + "Debug tree root", '('+instance.__class__.__name__+')')
-    elif instance in visited:
+        return
+    visit = False
+    for element in visited:
+        if instance is element:
+            visit = True
+    if visit:
         print(first_prefix, name + equality + "Already visited", '('+instance.__class__.__name__+')')
     else:
         if root is None:
             root = instance
-        elif not(instance in visited or instance.__class__ in (int,float,complex,str,bool)):
+        elif not(visit or instance.__class__ in (int,float,complex,str,bool)):
             ## if instance isn't in visited  and  instance is an object
             visited.append(instance)
-        if instance.__class__ in (list,tuple,numpy.ndarray):
+        if instance.__class__ in (list,tuple,ndarray):
             ## FIRST VERSION
             # simple = len(repr(instance)) < 30
             ## SECOND VERSION
@@ -27,7 +32,7 @@ def debug_print(instance, name="Debug", first_prefix="", second_prefix="", root 
                     simple = False
             ## --
             if simple:
-                print(first_prefix, name + equality + instance.__repr__())
+                print(first_prefix, name + equality + repr(instance))
             else:
                 print(first_prefix, name, '('+instance.__class__.__name__+')')
                 for i in range(len(instance)-1):
@@ -48,7 +53,7 @@ def debug_print(instance, name="Debug", first_prefix="", second_prefix="", root 
                         debug_print(dico[key], str(key), second_prefix+" ├──", second_prefix+" │  ", root, visited)
                     debug_print(dico[keys[-1]], str(keys[-1]), second_prefix+" └──", second_prefix+"    ", root, visited)
             except:
-                print(first_prefix, name + equality + instance.__repr__())
+                print(first_prefix, name + equality + repr(instance))
 
 
 class DebugCount:
@@ -59,6 +64,7 @@ class DebugCount:
     def incr(self, add = 1):
         self.value += add
         print(' '+self.name, self.value)
+        return self.value
     
     def reset(self):
         self.value = -1
