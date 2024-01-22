@@ -1,8 +1,6 @@
 from random import randint
 
 
-
-
 class Matrix:
 
 	def __init__(self,*args) -> None:
@@ -27,17 +25,7 @@ class Matrix:
 			#	There is only one argument
 			#	The argument is a Graph
 			# 	This Graph isn't empty
-			val = []
-			for i in range(len(args[0])):
-				val.append([])
-				for j in range(len(args[0])):
-					if args[0].verteces[j] in args[0].verteces[i].edges.keys():
-						val[i].append(args[0].verteces[i].edges[args[0].verteces[j]])
-					else:
-						val[i].append(0)
-			self.val = val
-			self.dim_x = len(args[0])
-			self.dim_y = len(args[0])
+			self = args[0].matrix.copy
 			return
 		elif len(args) >= 1 and isinstance(args[0],int): # Matrix creation
 			if len(args) == 1:
@@ -62,6 +50,9 @@ class Matrix:
 		self.dim_y = 0
 	
 	def __str__(self) -> str:
+		if self.dim_y == 0:
+			return "┌  ┐\n└  ┘"
+
 		max = []
 		for i in self.val[0]:
 			max.append(0)
@@ -103,7 +94,7 @@ class Matrix:
 
 	def insert_column(self,n:int,content:list) -> None:
 		for i in range(0,len(self.val)):
-			self.val[i] = self.val[i][0:n] + content[i] + self.val[i][n:]
+			self.val[i] = self.val[i][0:n] + [content[i]] + self.val[i][n:]
 		self.dim_y += 1
 
 	def __getitem__(self, position:tuple[int,int]):
@@ -161,7 +152,7 @@ class Matrix:
 		return (self**(other//2)).square*((other%2==0) + (other%2!=0)*self)
 
 	def __eq__(self, other) -> bool:
-		return self.val == other.val
+		return isinstance(other, Matrix) and self.val == other.val
 		
 	def __neq__(self, other) -> bool:
 		return not self == other
@@ -216,19 +207,7 @@ class Matrix:
 		return S
 
 	def get_comatrix(self):
-		return Matrix([[self[1,1],-self[1,0]],[-self[0,1],self[0,0]]]) if len(self)==2 else Matrix(
-			[
-				[
-					(-1)**(i+j)*Matrix(
-						[
-							[
-								self[ii+(ii>=i),jj+(jj>=j)]
-							for jj in range(self.dim_x-1)]
-						for ii in range(self.dim_y-1)]
-					).det
-				for j in range(self.dim_x)]
-			for i in range(self.dim_y)]
-		)
+		return Matrix([[self[1,1],-self[1,0]],[-self[0,1],self[0,0]]]) if len(self)==2 else Matrix([[(-1)**(i+j)*Matrix([[self[ii+(ii>=i),jj+(jj>=j)] for jj in range(self.dim_x-1)] for ii in range(self.dim_y-1)]).det for j in range(self.dim_x)] for i in range(self.dim_y)])
 
 	copy = property(fget=get_copy)
 	dims = property(fget=get_dims)
@@ -238,11 +217,17 @@ class Matrix:
 	T = property(fget=get_transpo)
 	comatrix = property(fget=get_comatrix)
 
+
 class Graph:
 	"Mathematicl Graph"
 
-	def __init__(self) -> None:
-		self.verteces = []
+	def __init__(self, verteces:list = [], matrix:Matrix|None = None) -> None:
+		self.verteces = verteces
+		if matrix is None or matrix.dim_y != len(verteces) or matrix.dim_x != len(verteces):
+			self.matrix = Matrix(len(verteces))
+		else:
+			self.matrix = matrix
+		
 	
 	def __len__(self):
 		return len(self.verteces)
@@ -252,47 +237,23 @@ class Graph:
 			return "Graph()"
 		s = "Graph ("
 		for vertex in self.verteces:
-			s += vertex.name
-			s += ", "
+			s += repr(vertex) + ", "
 		return s[:-2] + ')'
 	
-	def vertex(self, name):
-		for vertex in self.verteces:
-			if vertex.name == str(name):
-				return vertex
+	def __getitem__(self, index):
+		return self.verteces[index]
 	
-	def get_links(self) -> dict:
-		links = {}
-		for vertex in self.verteces:
-			links[vertex] = vertex.edges
-		return links
+	def __setitem__(self, index, vertex):
+		self.verteces[index] = vertex
 	
-	links = property(fget=get_links)
+	def append(self, vertex):
+		self.verteces.append(vertex)
+	
+	def edge(self, vertex1, vertex2, weight=1, directed=False):
+		self.matrix[self.verteces.index(vertex1),self.verteces.index(vertex2)] += weight
+		if not directed:
+			self.matrix[self.verteces.index(vertex2),self.verteces.index(vertex1)] += weight
 
-class Vertex:
-	"Mathematical Graph Vertex"
-
-	def __init__(self, graph:Graph, name = "") -> None:
-		graph.verteces.append(self)
-
-		if name == "":
-			name = str(len(graph))
-
-		self.graph = graph
-		self.edges = {}
-		self.name = name
-	
-	def link_to(self, other, value = 1) -> None:
-		if other in self.edges.keys():
-			self.edges[other] += value
-		self.edges[other] = value
-	
-	def double_link_to(self, other, value = 1) -> None:
-		self.link_to(other, value)
-		other.link_to(self, value)
-	
-	def __repr__(self) -> str:
-		return "Vertex " + self.name
 
 
 
@@ -401,32 +362,4 @@ def print_mat(mat:Matrix,start="Matrix",end='\n',start_line='',line_prefix=False
 		if printed: print(S)
 		return S
 
-
-def link(vertex_1:Vertex, vertex_2:Vertex, value=1) -> None:
-	"""Link two verteces to each other"""
-	vertex_1.link_to(vertex_2, value)
-	vertex_2.link_to(vertex_1, value)
-
-def print_links(links:dict[Vertex, dict], printed=True) -> str:
-	if not(links):
-		s = "No links"
-		if printed: print(s)
-		return s
-	s = ""
-	for key in links.keys():
-		s += "\nVertex " + key.name
-		if key.edges:
-			s += ", linked to "
-			for vertex,value in key.edges.items():
-				s += vertex.name
-				if value != 0:
-					s += "({})".format(value)
-				s += ", "
-			s = s[:-2]
-	s = s[1:]
-	if printed: print(s)
-	return s
-
-def print_graph_links(graph:Graph, printed = True) -> str:
-	return print_links(graph.links, printed)
 
