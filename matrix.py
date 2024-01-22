@@ -1,4 +1,3 @@
-from debug import *
 from random import randint
 
 
@@ -161,6 +160,11 @@ class Matrix:
 		if other < 0: return ~(self**-other)
 		return (self**(other//2)).square*((other%2==0) + (other%2!=0)*self)
 
+	def __eq__(self, other) -> bool:
+		return self.val == other.val
+		
+	def __neq__(self, other) -> bool:
+		return not self == other
 
 	def column_shear(self,i,j,value):
 		self.val = (self*shear_mat(self.dim_x, i, j, value)).val
