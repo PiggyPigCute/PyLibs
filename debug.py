@@ -1,7 +1,7 @@
 
 from numpy import ndarray
 
-def debug_print(instance, name = "Debug", first_prefix = "", second_prefix = "", root = None, visited = None, equality = " = "):
+def debug_print(instance, name = "Debug", first_prefix = "", second_prefix = "", root = None, visited = None, line=0, equality = " = "):
     if visited == None:
         visited = []
     if instance is None:
@@ -10,18 +10,18 @@ def debug_print(instance, name = "Debug", first_prefix = "", second_prefix = "",
     if instance is root:
         print(first_prefix, name + equality + "Debug tree root", '('+instance.__class__.__name__+')')
         return
-    visit = False
-    for element in visited:
-        if instance is element:
-            visit = True
-    if visit:
-        print(first_prefix, name + equality + "Already visited", '('+instance.__class__.__name__+')')
+    visit = -1
+    for obj_pos in visited:
+        if instance is obj_pos[0]:
+            visit = obj_pos[1]
+    if visit > -1:
+        print(first_prefix, name + equality + "Already visited", '('+instance.__class__.__name__+', line ' + str(visit) + ')')
     else:
         if root is None:
             root = instance
-        elif not(visit or instance.__class__ in (int,float,complex,str,bool)):
-            ## if instance isn't in visited  and  instance is an object
-            visited.append(instance)
+        elif not instance.__class__ in (int,float,complex,str,bool):
+            ## instance is an object, then add to visited
+            visited.append((instance,line))
         if instance.__class__ in (list,tuple,ndarray):
             ## FIRST VERSION
             # simple = len(repr(instance)) < 30
@@ -36,8 +36,8 @@ def debug_print(instance, name = "Debug", first_prefix = "", second_prefix = "",
             else:
                 print(first_prefix, name, '('+instance.__class__.__name__+')')
                 for i in range(len(instance)-1):
-                    debug_print(instance[i], "", second_prefix+" ╠══", second_prefix+" ║  ", root, visited, "")
-                debug_print(instance[-1], "", second_prefix+" ╚══", second_prefix+"    ", root, visited, "")
+                    debug_print(instance[i], "", second_prefix+" ╠══", second_prefix+" ║  ", root, visited, line+1, "")
+                debug_print(instance[-1], "", second_prefix+" ╚══", second_prefix+"    ", root, visited, line+1, "")
         else:
             try:
                 if isinstance(instance, dict):
@@ -50,8 +50,8 @@ def debug_print(instance, name = "Debug", first_prefix = "", second_prefix = "",
                 else:
                     print(first_prefix, name, '('+instance.__class__.__name__+')')
                     for key in keys[:-1]:
-                        debug_print(dico[key], str(key), second_prefix+" ├──", second_prefix+" │  ", root, visited)
-                    debug_print(dico[keys[-1]], str(keys[-1]), second_prefix+" └──", second_prefix+"    ", root, visited)
+                        debug_print(dico[key], str(key), second_prefix+" ├──", second_prefix+" │  ", root, visited, line+1)
+                    debug_print(dico[keys[-1]], str(keys[-1]), second_prefix+" └──", second_prefix+"    ", root, visited, line+1)
             except:
                 print(first_prefix, name + equality + repr(instance))
 
