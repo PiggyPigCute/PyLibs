@@ -61,7 +61,7 @@ class DebugCount:
         self.value = -1
         self.name = name
     
-    def incr(self, add = 1):
+    def __call__(self, add = 1):
         self.value += add
         print(' '+self.name, self.value)
         return self.value
@@ -69,11 +69,11 @@ class DebugCount:
     def reset(self):
         self.value = -1
     
-    i = property(fget=incr)
+    i = property(fget=__call__)
 
 
 
-def debug(*values, name = "Debug", separator = ' ', prefix=' ', repr=True):
+def debug(*values, name = "Debug", separator = ' ', prefix = ' ', repr=True):
     print(prefix+name, end=' ')
     for val in values:
         if repr:
