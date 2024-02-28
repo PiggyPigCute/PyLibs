@@ -131,10 +131,13 @@ class Matrix:
 	def __rmul__(self,other):
 		return self*other
 
-	def __neg__(self,other):
+	def __neg__(self):
 		K = self.copy
 		K *= -1
 		return K
+
+	def __sub__(self,other):
+		return self + (-other)
 
 	def __list__(self) -> list:
 		return self.val
@@ -209,13 +212,14 @@ class Matrix:
 	def get_comatrix(self):
 		return Matrix([[self[1,1],-self[1,0]],[-self[0,1],self[0,0]]]) if len(self)==2 else Matrix([[(-1)**(i+j)*Matrix([[self[ii+(ii>=i),jj+(jj>=j)] for jj in range(self.dim_x-1)] for ii in range(self.dim_y-1)]).det for j in range(self.dim_x)] for i in range(self.dim_y)])
 
-	copy = property(fget=get_copy)
-	dims = property(fget=get_dims)
-	det = property(fget=get_det)
-	square = property(fget=get_square)
-	transpo = property(fget=get_transpo)
-	T = property(fget=get_transpo)
-	comatrix = property(fget=get_comatrix)
+	copy = property(get_copy)
+	dims = property(get_dims)
+	det = property(get_det)
+	square = property(get_square)
+	transpo = property(get_transpo)
+	T = property(get_transpo)
+	comatrix = property(get_comatrix)
+
 
 
 class Graph:
@@ -267,7 +271,7 @@ def id_mat(n:int) -> Matrix:
 	return m
 
 def elem_mat(n:int, i:int, j:int) -> Matrix:
-	"""Return the Elementary matrix (i,i) with a size of n
+	"""Return the Elementary matrix (i,j) with a size of n
 	
 	The Elementary matrix (i,j) is the matrix filled with 0 with only a 1 at position (i,j)"""
 	m = Matrix(n)
