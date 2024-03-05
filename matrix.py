@@ -152,7 +152,7 @@ class Matrix:
 		if other == 0: return id_mat(self.dim_y)
 		if other == 2: return self*self
 		if other < 0: return ~(self**-other)
-		return (self**(other//2)).square*((other%2==0) + (other%2!=0)*self)
+		return (self**(other//2)).square*(self if other%2==1 else 1)
 
 	def __eq__(self, other) -> bool:
 		return isinstance(other, Matrix) and self.val == other.val
