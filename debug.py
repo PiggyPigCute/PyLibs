@@ -1,7 +1,7 @@
 
-from numpy import ndarray
+from numpy import ndarray as _numpy_array
 
-def debug_print(instance, name = "Debug", first_prefix = "", second_prefix = "", root = None, visited = None, line=0, equality = " = "):
+def debug_print(instance, name = "Debug", first_prefix = "", second_prefix = "", root = None, visited = None, line = 0, equality = " = "):
     if visited == None:
         visited = []
     if instance is None:
@@ -22,14 +22,14 @@ def debug_print(instance, name = "Debug", first_prefix = "", second_prefix = "",
         elif not instance.__class__ in (int,float,complex,str,bool):
             ## instance is an object, then add to visited
             visited.append((instance,line))
-        if instance.__class__ in (list,tuple,ndarray):
+        if instance.__class__ in (list,tuple,_numpy_array):
             ## FIRST VERSION
-            # simple = len(repr(instance)) < 30
+            simple = len(repr(instance)) < 30
             ## SECOND VERSION
-            simple = True
-            for item in instance:
-                if not type(item) in (int,float,bool):
-                    simple = False
+            # simple = True
+            # for item in instance:
+            #     if not type(item) in (int,float,bool):
+            #         simple = False
             ## --
             if simple:
                 print(first_prefix, name + equality + repr(instance))
@@ -57,19 +57,29 @@ def debug_print(instance, name = "Debug", first_prefix = "", second_prefix = "",
 
 
 class DebugCount:
-    def __init__(self, name = "Debug") -> None:
-        self.value = -1
+    def __init__(self, name = "Debug", zero:int|float|bool = 0):
+        self.value = zero
+        self.zero = zero
         self.name = name
+        print(' '+name, zero, "(init)")
     
-    def __call__(self, add = 1):
-        self.value += add
+    def get(self):
         print(' '+self.name, self.value)
         return self.value
+
+    def __call__(self, add:int|float|bool = 1):
+        self.value += add
+        self.get()
+
+    def set(self, value):
+        self.value = value
+        self.get()
     
     def reset(self):
-        self.value = -1
+        self.value = self.zero
+        self.get()
     
-    i = property(fget=__call__)
+    i = property(__call__, set)
 
 
 
