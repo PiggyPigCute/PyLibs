@@ -11,8 +11,11 @@ class Atom:
         if isinstance(arg, int):
             self.z = arg
         elif isinstance(arg, str):
-            if arg in ATOM_SYMBOLS:
-                self.z = ATOM_SYMBOLS.index(arg)
+            if arg.capitalize() in ATOM_SYMBOLS:
+                self.z = ATOM_SYMBOLS.index(arg.capitalize())
+            elif arg.capitalize() in ATOM_NAMES:
+                self.z = ATOM_NAMES.index(arg.capitalize())
+            
     
     def __str__(self) -> str:
         return "Atom(" + self.symb + ")"
