@@ -31,7 +31,7 @@ class unit():
     def __str__(self) -> str:
         if isinstance(self.val, float):
             result = ('%g' % self.val) + ' '
-        elif self.val is 1:
+        elif isinstance(self.val, int) and self.val == 1:
             result = ""
         else:
             result = str(self.val) + ' '
@@ -128,7 +128,9 @@ class unit():
 	
     
     
-def unit_print(value:unit, unit:unit, symb="", **kwargs):
+def unit_print(value:unit, unit:unit, symb="", name=None, *args, **kwargs):
+    if name != None:
+        print(name + " = ", end="")
     print(value/unit, symb, **kwargs)
 
 def dim(unit:unit):
@@ -151,7 +153,7 @@ nm_ = unit([1,0,0,0,0,0,0], 1e-9)
 pm_ = unit([1,0,0,0,0,0,0], 1e-12)
 ly_ = unit([1,0,0,0,0,0,0], 9460730472580800) # light-year
 
-t = unit([0,1,0,0,0,0,0], 1e3)
+t_ = unit([0,1,0,0,0,0,0], 1e3)
 g_ = unit([0,1,0,0,0,0,0], 1e-3)
 mg_ = unit([0,1,0,0,0,0,0], 1e-6)
 µg_ = unit([0,1,0,0,0,0,0], 1e-9)
@@ -173,6 +175,7 @@ mps_ = unit([1,0,-1,0,0,0,0])
 mpss_ = unit([1,0,-2,0,0,0,0])
 N_ = unit([1,1,-2,0,0,0,0])
 J_ = unit([2,1,-2,0,0,0,0])
+eV_ = unit([2,1,-2,0,0,0,0], 1.602176634e-19)
 W_ = unit([2,1,-3,0,0,0,0])
 V_ = unit([2,1,-3,-1,0,0,0])
 Ω_ = unit([2,1,-3,-2,0,0,0])
@@ -187,6 +190,7 @@ Pa_ = unit([-1,1,-2,0,0,0,0])
 bar_ = unit([-1,1,-2,0,0,0,0], 1e-5)
 Hz_ = unit([0,0,-1,0,0,0,0])
 Bq_ = Hz_
+T_ = unit([0,1,-2,-1,0,0,0])
 
 π__ = 3.1415926535897932
 pi__ = π__
