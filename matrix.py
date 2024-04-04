@@ -4,19 +4,19 @@ from random import randint
 class Matrix:
 
 	def __init__(self,*args) -> None:
-		if len(args) == 1 and isinstance(args[0],list) and len(args[0]) > 0 and isinstance(args[0][0],list): # Matrix from matrix
+		if len(args) == 1 and type(args[0]) in (list,tuple) and len(args[0]) > 0 and type(args[0][0]) in (list,tuple): # Matrix from matrix
 			# If :
 			#	There is only one argument
-			#	The argument is a list
+			#	The argument is a list or tuple
 			# 	This list isn't empty
-			# 	This list contains lists
+			# 	This list contains lists or tuple
 			dim_x = len(args[0][0])
 			equal_rows = True
 			for row in args[0]:
 				if len(row) != dim_x:
 					equal_rows = False
 			if equal_rows:
-				self.val = args[0].copy()
+				self.val = args[0][:]
 				self.dim_x = dim_x
 				self.dim_y = len(args[0])
 				return
@@ -62,24 +62,24 @@ class Matrix:
 					max[j] = len(str(i[j]))
 			
 		S = ""
-		line_size = 0
+		raw_size = 0
 		for i in range(0,len(self.val)):
 			for j in range(0,len(self.val[i])):
 				element = str(self.val[i][j])
 				S += element
 				S += ' '*(max[j]-len(element)+1)
 			if i==0:
-				line_size = len(S)+1
+				raw_size = len(S)+1
 			S += "│\n│ "
 
-		return "┌" + " "*line_size + "┐\n│ " + S[:-2] + "└" + " "*line_size + "┘"
+		return "┌" + " "*raw_size + "┐\n│ " + S[:-2] + "└" + " "*raw_size + "┘"
 	
 	def __repr__(self) -> str:
 		if self.val == []:
 			return "Matrix()"
 		return "Matrix(" + self.val.__repr__() + ")"
 
-	def get_line(self,n) -> list:
+	def get_raw(self,n) -> list:
 		return self.val[n]
 
 	def get_column(self,n) -> list:
@@ -88,7 +88,7 @@ class Matrix:
 			s.append(i[n])
 		return s
 
-	def insert_line(self,n:int,content:list) -> None:
+	def insert_raw(self,n:int,content:list) -> None:
 		self.val = self.val[0:n] + [content] + self.val[n:]
 		self.dim_x += 1
 
@@ -161,7 +161,7 @@ class Matrix:
 		return not self == other
 
 	def column_shear(self,i,j,value):
-		self.val = (self*shear_mat(self.dim_x, i, j, value)).val
+		self.val = (self*shear_mat(self.dim_x, j, i, value)).val
 		return self
 	
 	def column_expand(self,i,value):
@@ -172,18 +172,18 @@ class Matrix:
 		self.val = (self*permutation_mat(self.dim_x, i, j)).val
 		return self
 	
-	def line_shear(self,i,j,value):
+	def raw_shear(self,i,j,value):
 		self.val = (shear_mat(self.dim_y, i, j, value)*self).val
 		return self
 	
-	def line_expand(self,i,value):
+	def raw_expand(self,i,value):
 		self.val = (expansion_mat(self.dim_y, i, value)*self).val
 		return self
 	
-	def line_permutate(self,i,j):
+	def raw_permutate(self,i,j):
 		self.val = (permutation_mat(self.dim_y, i, j) * self).val
 		return self
-	
+
 	def get_copy(self):
 		copy = Matrix(self.dim_y,self.dim_x)
 		for i in range(self.dim_y):
@@ -285,8 +285,8 @@ def diag_mat(*args) -> Matrix:
 		m[i,i] = args[i]
 	return m
 
-def line_mat(*args) -> Matrix:
-	"""Return the Line matrix with given values"""
+def raw_mat(*args) -> Matrix:
+	"""Return the Raw matrix with given values"""
 	return Matrix([list(args)])
 
 def column_mat(*args) -> Matrix:
@@ -328,7 +328,7 @@ def rand_mat(n:int,p:int,min=0,max=9)->Matrix:
 	"""Return a random matrix of size n,p filled with random integers between min and max (including both)"""
 	return Matrix([[randint(min,max) for j in range(p)] for i in range(n)])
 
-def print_mat(mat:Matrix,start="Matrix",end='\n',start_line='',line_prefix=False,dimensions=True,printed=True) -> str:
+def print_mat(mat:Matrix,start="Matrix",end='\n',start_raw='',raw_prefix=False,dimensions=True,printed=True) -> str:
 		# affiche une matrice
 
 		if mat.val == []:
@@ -353,9 +353,9 @@ def print_mat(mat:Matrix,start="Matrix",end='\n',start_line='',line_prefix=False
 					max[j] = len(str(i[j]))
 			
 		for i in range(0,len(mat.val)):
-			if line_prefix:
+			if raw_prefix:
 				S += str(i)
-			S += start_line
+			S += start_raw
 			for j in range(0,len(mat.val[i])):
 				element = str(mat.val[i][j])
 				S += element
@@ -365,5 +365,8 @@ def print_mat(mat:Matrix,start="Matrix",end='\n',start_line='',line_prefix=False
 
 		if printed: print(S)
 		return S
+
+def minor(mat:Matrix, i:int, j:int):
+	return Matrix([[mat[ii-(ii-1<i),jj-(jj-1<j)] for jj in range(1,mat.dim_x)] for ii in range(1,mat.dim_y)])
 
 
