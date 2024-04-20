@@ -27,7 +27,16 @@ class Matrix:
 			# 	This Graph isn't empty
 			self = args[0].matrix.copy
 			return
-		elif len(args) >= 1 and isinstance(args[0],int): # Matrix creation
+		if len(args) == 1 and isinstance(args[0],Matrix) and len(args[0]) > 0: # Matrix from Matrix
+			self.dim_y = args[0].dim_y
+			self.dim_x = args[0].dim_x
+			self.val = []
+			for i in range(self.dim_y):
+				self.val.append([])
+				for j in range(self.dim_x):
+					self.val[i].append(args[0][i,j])
+			return
+		if len(args) >= 1 and isinstance(args[0],int): # Matrix creation
 			if len(args) == 1:
 				dim_y, dim_x, value = args[0], args[0], 0
 				value = 0
@@ -96,6 +105,15 @@ class Matrix:
 		for i in range(0,len(self.val)):
 			self.val[i] = self.val[i][0:n] + [content[i]] + self.val[i][n:]
 		self.dim_y += 1
+
+	def remove_raw(self,n) -> None:
+		del self.val[n]
+		self.dim_y -= 1
+	
+	def remove_column(self,n) -> None:
+		for i in range(self.dim_y):
+			del self.val[i][n]
+		self.dim_x -= 1
 
 	def __getitem__(self, position:tuple[int,int]):
 		return self.val[position[0]][position[1]]
@@ -324,7 +342,7 @@ def permutation_mat(n:int, i:int, j:int) -> Matrix:
 	m[j,j] = 0
 	return m
 
-def rand_mat(n:int,p:int,min=0,max=9)->Matrix:
+def rand_mat(n:int,p:int,min=0,max=9) -> Matrix:
 	"""Return a random matrix of size n,p filled with random integers between min and max (including both)"""
 	return Matrix([[randint(min,max) for j in range(p)] for i in range(n)])
 
@@ -367,6 +385,6 @@ def print_mat(mat:Matrix,start="Matrix",end='\n',start_raw='',raw_prefix=False,d
 		return S
 
 def minor(mat:Matrix, i:int, j:int):
-	return Matrix([[mat[ii-(ii-1<i),jj-(jj-1<j)] for jj in range(1,mat.dim_x)] for ii in range(1,mat.dim_y)])
+	return Matrix([[mat[ii-(ii-1<i),jj-(jj-1<j)] for jj in range(1,mat.dim_x)] for ii in range(1,mat.dim_y)]).det
 
 
